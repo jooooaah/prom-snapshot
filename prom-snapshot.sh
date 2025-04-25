@@ -11,8 +11,14 @@
 #   --basic-auth=      : Credentials in user:password format for HTTP Basic Auth
 #   --target-file=     : Full path (incl. filename) to save the .tar.gz backup file
 
+# Load .env if exists
+ENV_FILE="$(dirname "$0")/.env"
+if [[ -f "$ENV_FILE" ]]; then
+  source "$ENV_FILE"
+fi
+
 PROMETHEUS_URL=""
-BASIC_AUTH=""
+BASIC_AUTH="${PROMETHEUS_AUTH:-}"  # default from .env
 SNAPSHOT_DIR=""
 TARGET_FILE=""
 
@@ -30,6 +36,10 @@ done
 if [[ -z "$PROMETHEUS_URL" || -z "$SNAPSHOT_DIR" ]]; then
   echo "Error: --url and --snapshot-dir are required."
   exit 1
+fi
+
+if [[ -z "$BASIC_AUTH" ]]; then
+  echo "Warning: No Basic Auth provided. If your Prometheus requires it, this will fail."
 fi
 
 # Remove trailing slash if present
